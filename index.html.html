@@ -386,7 +386,7 @@
       <!-- Country & Currency Selector -->
       <div class="form-group">
         <label for="country">Select Country / Region</label>
-        <select id="country" class="form-control" onchange="updateCurrency()">
+        <select id="country" name="country" class="form-control" onchange="updateCurrency()">
           <option value="IN" data-symbol="₹" data-rate="1" data-base="12999">India (₹ INR)</option>
           <option value="US" data-symbol="$" data-rate="0.012" data-base="149.99">United States ($ USD)</option>
           <option value="UK" data-symbol="£" data-rate="0.0095" data-base="119.99">United Kingdom (£ GBP)</option>
@@ -402,15 +402,15 @@
       <div class="form-grid">
         <div class="form-group full-width">
           <label for="fullName">Full Name</label>
-          <input type="text" id="fullName" class="form-control" placeholder="John Doe" required>
+          <input type="text" id="fullName" name="fullName" class="form-control" placeholder="John Doe" required>
         </div>
         <div class="form-group">
           <label for="email">Email Address</label>
-          <input type="email" id="email" class="form-control" placeholder="john@example.com" required>
+          <input type="email" id="email" name="email" class="form-control" placeholder="john@example.com" required>
         </div>
         <div class="form-group">
           <label for="phone">Phone Number</label>
-          <input type="tel" id="phone" class="form-control" placeholder="+91 98765 43210" required>
+          <input type="tel" id="phone" name="phone" class="form-control" placeholder="+91 98765 43210" required>
         </div>
       </div>
 
@@ -419,19 +419,19 @@
       <div class="form-grid">
         <div class="form-group full-width">
           <label for="address">Street Address / House No.</label>
-          <input type="text" id="address" class="form-control" placeholder="123 Innovation Way, Apt 4B" required>
+          <input type="text" id="address" name="address" class="form-control" placeholder="123 Innovation Way, Apt 4B" required>
         </div>
         <div class="form-group">
           <label for="city">City</label>
-          <input type="text" id="city" class="form-control" placeholder="Hyderabad" required>
+          <input type="text" id="city" name="city" class="form-control" placeholder="Hyderabad" required>
         </div>
         <div class="form-group">
           <label for="state">State / Province</label>
-          <input type="text" id="state" class="form-control" placeholder="Telangana" required>
+          <input type="text" id="state" name="state" class="form-control" placeholder="Telangana" required>
         </div>
         <div class="form-group">
           <label for="zip">ZIP / Postal Code</label>
-          <input type="text" id="zip" class="form-control" placeholder="500081" required>
+          <input type="text" id="zip" name="zip" class="form-control" placeholder="500081" required>
         </div>
       </div>
 
@@ -440,7 +440,7 @@
       <div class="form-grid">
         <div class="form-group">
           <label for="variant">Color Finish</label>
-          <select id="variant" class="form-control">
+          <select id="variant" name="variant" class="form-control">
             <option value="black">Matte Stealth Black</option>
             <option value="white">Arctic White</option>
             <option value="cyber">Cyberpunk RGB Edition</option>
@@ -448,7 +448,7 @@
         </div>
         <div class="form-group">
           <label for="switches">Micro-Switch Type</label>
-          <select id="switches" class="form-control">
+          <select id="switches" name="switches" class="form-control">
             <option value="tactile">TTC Gold (Tactile & Crisp)</option>
             <option value="silent">Kailh Silent Yellow (Whisper Quiet)</option>
             <option value="optical">Omron Optical (Ultra Fast)</option>
@@ -676,6 +676,43 @@
 
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
+
+    // Form Submission with Email Notification
+    document.getElementById("orderForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData.entries());
+
+      const submitBtn = this.querySelector("button[type='submit']");
+      const originalText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Processing...";
+
+      try {
+        const response = await fetch("/.netlify/functions/order", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.message || "Something went wrong");
+        }
+
+        alert("✅ Your order was placed successfully! Check your email for confirmation.");
+        this.reset();
+      } catch (error) {
+        alert("Order submitted: " + error.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+      }
+    });
   </script>
 </body>
 </html>
